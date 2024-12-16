@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harisaran - Developer Portfolio</title>
+    <style>
+        :root {
+            --bg-color: #0a192f;
+            --bg-secondary: #112240;
+            --text-primary: #00ffab;
+            --text-secondary: #00cc99;
+            --accent-color-1: #ff6b6b;
+            --accent-color-2: #4ecdc4;
+            --cursor-color: #00ffab;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #loading-bar {
+            width: 50%;
+            height: 10px;
+            background-color: var(--bg-secondary);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        #loading-progress {
+            width: 0;
+            height: 100%;
+            background-color: var(--text-primary);
+            transition: width 0.5s ease-in-out;
+        }
+
+        #terminal {
+            width: 100vw;
+            height: 100vh;
+            padding: 20px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, var(--bg-color), var(--bg-secondary));
+            display: flex;
+            flex-direction: column;
+            display: none;
+        }
+
+        #output {
+            flex-grow: 1;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            font-size: 16px;
+            word-wrap: break-word;
+            font-family: 'Consolas', monospace;
+        }
+
+        @media (max-width: 768px) {
+            #output {
+                font-size: 12px;
+            }
+            .ascii-art {
+                font-size: 8px !important;
+                line-height: 1 !important;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+        }
+
+        .ascii-art {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1;
+            color: var(--accent-color-2);
+            overflow-wrap: break-word;
+        }
+
+        #input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        #prompt {
+            color: var(--accent-color-2);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+            width: calc(100% - 150px);
+            caret-color: var(--cursor-color);
+        }
+
+        .highlight {
+            color: var(--accent-color-1);
+            font-weight: bold;
+        }
+
+        .easter-egg {
+            color: var(--accent-color-2);
+            animation: pulse 2s infinite;
+        }
+
+        .hyperlink {
+            color: var(--text-secondary);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .hyperlink:hover {
+            color: var(--accent-color-1);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+
+        .glitch-text {
+            animation: glitch 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="ascii-art">
+🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️
+🖥️   Loading Harisaran's       🖥️
+🖥️    Portfolio Terminal       🖥️
+🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️
+        </div>
+        <div id="loading-bar">
+            <div id="loading-progress"></div>
+        </div>
+    </div>
+
+    <div id="terminal">
+        <div id="output"></div>
+        <div id="input-line">
+            <span id="prompt">nambuharisaran@portfolio:~$</span>
+            <input type="text" id="command-input" autocomplete="off">
+        </div>
+    </div>
+
+    <script>
+        const loadingScreen = document.getElementById('loading-screen');
+        const loadingProgress = document.getElementById('loading-progress');
+        const terminal = document.getElementById('terminal');
+        const output = document.getElementById('output');
+        const commandInput = document.getElementById('command-input');
+        const prompt = document.getElementById('prompt');
+
+        // Loading Screen
+        function simulateLoading() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                loadingProgress.style.width = `${Math.min(progress, 100)}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        terminal.style.display = 'flex';
+                        commandInput.focus();
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        // Simplified ASCII Art
+        const asciiLogo = `
+ _   _    _    ____  ___ ____    _    ____      _    _   _ 
+| | | |  / \  |  _ \|_ _/ ___|  / \  |  _ \    / \  | \ | |
+| |_| | / _ \ | |_) || |\___ \ / _ \ | |_) |  / _ \ |  \| |
+|  _  |/ ___ \|  _ < | | ___) / ___ \|  _ <  / ___ \| |\  |
+|_| |_/_/   \_\_| \_\___|____/_/   \_\_| \_\/_/   \_\_| \_|`;
+
+        // Updated Project Data with Hyperlinks
+        const projectsData = [
+            {
+                name: "Terminal Portfolio",
+                description: "Interactive web-based terminal portfolio",
+                technologies: ["HTML", "CSS", "JavaScript"],
+                githubLink: "https://github.com/HARISARAN123/terminal-portfolio"
+            },
+            {
+                name: "Growmate",
+                description: "Ai Powered Agriculture super app",
+                technologies: ["Python","CSS", "HTML", "MongoDB"],
+                githubLink: "https://github.com/HARISARAN123/growmate"
+            }
+        ];
+
+        // Commands with Hyperlinks
+        const commands = {
+            help: () => {
+                return `<span class='highlight'>Available Commands:</span>
+help        - Show this help menu
+about       - Learn about Harisaran
+skills      - View technical skills
+projects    - List notable projects
+contact     - Get contact information
+socials     - View social media links
+easter      - Surprise command!
+clear       - Clear the terminal screen`;
+            },
+            about: () => {
+                return `
+<span class='highlight'>Professional Profile</span>
+Name: Nambuharisaran Veeravelan
+Role: Full Stack Developer & Software Engineer
+
+<span class='highlight'>Quick Bio:</span>
+Innovative developer passionate about creating 
+impactful technological solutions. Expertise in 
+web development, cloud computing, and emerging 
+technologies.
+
+<span class='highlight'>Core Strengths:</span>
+• Full Stack Development
+• Cloud Solutions
+• Problem Solving
+• Continuous Learning`;
+            },
+            skills: () => {
+                return `
+<span class='highlight'>Technical Skills:</span>
+🚀 Programming Languages:
+   • Python
+   • HTML
+   • CSS
+   • c++
+   • Python
+   • Java
+
+🌐 Web Technologies:
+   • React
+   • Flask app
+   • Django
+
+            },
+            projects: () => {
+                return `<span class='highlight'>Notable Projects:</span>
+${projectsData.map(project => `
+📦 <span class='highlight'>${project.name}</span>
+   Description: ${project.description}
+   Technologies: ${project.technologies.join(', ')}
+   🔗 GitHub: <a href="${project.githubLink}" class="hyperlink" target="_blank">${project.githubLink}</a>`).join('\n')}`;
+            },
+            contact: () => {
+                return `
+<span class='highlight'>Contact Information:</span>
+📧 Email    : <a href="mailto:nambuharisaran123@gmail.com" class="hyperlink">nambuharisaran123@gmail.com</a>
+🌐 Portfolio: <a href="https://nambuharisaran.github.io" class="hyperlink">HARISARAN123.github.io</a>
+📍 Location : [Madurai,Tamilnadu]`;
+            },
+            socials: () => {
+                return `
+<span class='highlight'>Social Media Links:</span>
+🔗 LinkedIn : <a href="https://linkedin.com/in/nambuharisaran" class="hyperlink" target="_blank">linkedin.com/in/nambuharisaran</a>
+🐱 GitHub   : <a href="https://github.com/HARISARAN123" class="hyperlink" target="_blank">github.com/nambuharisaran</a>
+🐦 Twitter  : <a href="https://twitter.com/nambuharisaran" class="hyperlink" target="_blank">twitter.com/nambuharisaran</a>
+📸 Instagram: <a href="https://instagram.com/harisaran.xx__" class="hyperlink" target="_blank">instagram.com/harisaran.xx__</a>`;
+            },
+            easter: () => {
+                const easterEggs = [
+                    "🎉 Congratulations! You found the secret command!",
+                    "🚀 Did you know? I love creating innovative solutions!",
+                    "🤖 Tech is my passion, coding is my superpower!",
+                    "🌟 Every bug is just an undocumented feature waiting to be discovered!"
+                ];
+                return `<span class='easter-egg'>${easterEggs[Math.floor(Math.random() * easterEggs.length)]}</span>`;
+            },
+            colab: () => {
+                return `
+<span class='highlight'>Collaboration Opportunities</span>
+🤝 Open to Collaborations:
+   • Open Source Projects
+   • Innovative Tech Solutions
+   • Machine Learning Initiatives
+
+<span class='easter-egg'>Interested in working together? 
+Let's create something amazing! 🚀</span>
+
+📧 Collaboration Inquiry: 
+   <a href="mailto:nambuharisaran@example.com" class="hyperlink">nambuharisaran@example.com</a>`;
+            },
+            instagram: () => {
+                return `
+<span class='highlight'>Instagram Insights</span>
+📸 Instagram: <a href="https://instagram.com/harisaran.xx__" class="hyperlink" target="_blank">@nambuharisaran</a>
+
+<span class='easter-egg'>
+Tech stories, coding adventures, 
+and behind-the-scenes of my developer journey!
+Follow for daily tech inspiration! 🖥️✨</span>`;
+            },
+            clear: () => {
+                output.innerHTML = '';
+                return '';
+            }
+        };
+
+        function displayOutput(text) {
+            const outputDiv = document.createElement('div');
+            outputDiv.innerHTML = text;
+            output.appendChild(outputDiv);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function handleCommand() {
+            const command = commandInput.value.trim().toLowerCase();
+            displayOutput(`${prompt.textContent} ${command}`);
+
+            const matchedCommand = Object.keys(commands).find(
+                cmd => cmd.toLowerCase() === command
+            );
+
+            if (matchedCommand) {
+                displayOutput(commands[matchedCommand]());
+            } else {
+                displayOutput(`<span style="color: red;">Command not found: ${command}
+Type 'help' for available commands.</span>`);
+            }
+
+            commandInput.value = '';
+        }
+
+        // Event Listeners
+        commandInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                try {
+                    handleCommand();
+                } catch (err) {
+                    console.error('Error handling command:', err);
+                }
+            }
+        });
+
+        // Start Loading
+        window.addEventListener('load', () => {
+            simulateLoading();
+
+            // Initial welcome message after loading
+            displayOutput(`<div class='ascii-art'>${asciiLogo}</div>`);
+            displayOutput(`
+<span class='highlight'>Welcome to Harisaran's Developer Portfolio Terminal!</span>
+Type 'help' to explore available commands.`);
+        });
+    </script>
+</body>
+</html>
