@@ -128,13 +128,12 @@
         /* Animations and Effects */
         @keyframes terminal-load {
             0% { opacity: 0; transform: rotateX(-90deg); }
-            50%{ opacity:0 ;transform:   rotateX(-45deg);   }
             100% { opacity: 1; transform: rotateX(0deg); }
         }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.01); }
+            50% { transform: scale(1.05); }
         }
 
         @keyframes glitch {
@@ -350,6 +349,7 @@ technologies.
 
 <span class='highlight'>Core Strengths:</span>
 • Full Stack Development
+• Cloud Solutions
 • Problem Solving
 • Continuous Learning`;
             },
@@ -359,14 +359,20 @@ technologies.
 🚀 Programming Languages:
    • Python
    • JavaScript
-   • HTML & CSS
+   • TypeScript
    • Java
 
 🌐 Web Technologies:
+   • React
    • Node.js
-   • Django
-   • FLASK
-;
+   • Express
+   • GraphQL
+
+☁️ Cloud & DevOps:
+   • AWS
+   • Docker
+   • Kubernetes
+   • CI/CD Pipelines`;
             },
             projects: () => {
                 return `<span class='highlight'>Notable Projects:</span>
@@ -379,8 +385,8 @@ ${projectsData.map(project => `
             contact: () => {
                 return `
 <span class='highlight'>Contact Information:</span>
-📧 Email    : <a href="mailto:nambuharisaran123@gmail.com" class="hyperlink">nambuharisaran123@gmail.com</a>
-🌐 Portfolio: <a href="https://harisaran.netlify.app/" class="hyperlink">harisaran.netlify.app</a>
+📧 Email    : <a href="mailto:nambuharisaran@example.com" class="hyperlink">nambuharisaran@example.com</a>
+🌐 Portfolio: <a href="https://nambuharisaran.github.io" class="hyperlink">nambuharisaran.github.io</a>
 📍 Location : Bengaluru, India`;
             },
             socials: () => {
