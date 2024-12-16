@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harisaran - Developer Portfolio</title>
+    <title>Harisaran - Developer Portfolio Terminal</title>
     <style>
         :root {
-            --bg-color: #0a192f;
-            --bg-secondary: #112240;
+            --bg-primary: #121420;
+            --bg-secondary: #1e2235;
             --text-primary: #00ffab;
             --text-secondary: #00cc99;
             --accent-color-1: #ff6b6b;
             --accent-color-2: #4ecdc4;
+            --accent-color-3: #6a5acd;
             --cursor-color: #00ffab;
+            --shadow-color: rgba(0, 255, 171, 0.3);
         }
 
         * {
@@ -22,89 +24,88 @@
         }
 
         body {
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            background-color: var(--bg-color);
+            font-family: 'Fira Code', 'Consolas', monospace;
+            background-color: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
             overflow: hidden;
+            perspective: 1000px;
         }
 
+        /* Loading Screen Styles */
         #loading-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--bg-color);
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            overflow: hidden;
         }
 
         #loading-bar {
-            width: 50%;
-            height: 10px;
+            width: 300px;
+            height: 15px;
             background-color: var(--bg-secondary);
-            border-radius: 5px;
+            border-radius: 10px;
             overflow: hidden;
-            margin-top: 20px;
+            box-shadow: 0 0 15px var(--shadow-color);
         }
 
         #loading-progress {
             width: 0;
             height: 100%;
-            background-color: var(--text-primary);
-            transition: width 0.5s ease-in-out;
+            background: linear-gradient(to right, var(--text-primary), var(--accent-color-2));
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Terminal Styles */
         #terminal {
             width: 100vw;
             height: 100vh;
             padding: 20px;
-            overflow-y: auto;
-            background: linear-gradient(135deg, var(--bg-color), var(--bg-secondary));
-            display: flex;
-            flex-direction: column;
             display: none;
+            flex-direction: column;
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            overflow: hidden;
         }
 
         #output {
             flex-grow: 1;
-            white-space: pre-wrap;
             overflow-y: auto;
             font-size: 16px;
-            word-wrap: break-word;
-            font-family: 'Consolas', monospace;
-        }
-
-        @media (max-width: 768px) {
-            #output {
-                font-size: 12px;
-            }
-            .ascii-art {
-                font-size: 8px !important;
-                line-height: 1 !important;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-                overflow-wrap: break-word;
-            }
-        }
-
-        .ascii-art {
             white-space: pre-wrap;
             word-wrap: break-word;
-            font-family: monospace;
-            font-size: 12px;
-            line-height: 1;
-            color: var(--accent-color-2);
-            overflow-wrap: break-word;
+            padding: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color-2) var(--bg-secondary);
+        }
+
+        #output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #output::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        #output::-webkit-scrollbar-thumb {
+            background-color: var(--accent-color-2);
+            border-radius: 4px;
         }
 
         #input-line {
             display: flex;
             align-items: center;
+            background-color: var(--bg-secondary);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px var(--shadow-color);
         }
 
         #prompt {
@@ -117,31 +118,17 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-family: 'Consolas', 'Courier New', monospace;
+            font-family: 'Fira Code', monospace;
             font-size: 16px;
             outline: none;
-            width: calc(100% - 150px);
+            flex-grow: 1;
             caret-color: var(--cursor-color);
         }
 
-        .highlight {
-            color: var(--accent-color-1);
-            font-weight: bold; 
-        }
-
-        .easter-egg {
-            color: var(--accent-color-2);
-            animation: pulse 2s infinite;
-        }
-
-        .hyperlink {
-            color: var(--text-secondary);
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        .hyperlink:hover {
-            color: var(--accent-color-1);
+        /* Animations and Effects */
+        @keyframes terminal-load {
+            0% { opacity: 0; transform: rotateX(-90deg); }
+            100% { opacity: 1; transform: rotateX(0deg); }
         }
 
         @keyframes pulse {
@@ -155,12 +142,113 @@
             62% { transform: translate(0, 0) skew(5deg); }
         }
 
-        .glitch-text {
-            animation: glitch 1s linear infinite;
+        @keyframes runningStickman {
+            0% { transform: translateX(-50px) scaleX(1); }
+            25% { transform: translateX(0) scaleX(1.1); }
+            50% { transform: translateX(50px) scaleX(1); }
+            75% { transform: translateX(0) scaleX(1.1); }
+            100% { transform: translateX(-50px) scaleX(1); }
+        }
+
+        .glitch-text { animation: glitch 1s linear infinite; }
+        .pulse { animation: pulse 2s infinite; }
+        .terminal-enter { animation: terminal-load 0.8s ease-out; }
+
+        .ascii-art {
+            color: var(--accent-color-2);
+            font-family: monospace;
+            white-space: pre;
+            line-height: 1;
+        }
+
+        .hyperlink {
+            color: var(--accent-color-3);
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .hyperlink:hover {
+            color: var(--text-primary);
+        }
+
+        /* Stickman Running Animation */
+        #stickman-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: none;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .stickman {
+            width: 50px;
+            height: 100px;
+            position: relative;
+            animation: runningStickman 4s linear infinite;
+        }
+
+        .stickman-body {
+            position: absolute;
+            width: 2px;
+            height: 50px;
+            background-color: var(--text-primary);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .stickman-head {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--text-primary);
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .stickman-arm-left, .stickman-arm-right {
+            position: absolute;
+            width: 2px;
+            height: 30px;
+            background-color: var(--text-primary);
+            top: 20px;
+        }
+
+        .stickman-arm-left {
+            left: 40%;
+            transform: rotate(45deg);
+        }
+
+        .stickman-arm-right {
+            right: 40%;
+            transform: rotate(-45deg);
+        }
+
+        .stickman-leg-left, .stickman-leg-right {
+            position: absolute;
+            width: 2px;
+            height: 30px;
+            background-color: var(--text-primary);
+            bottom: 0;
+        }
+
+        .stickman-leg-left {
+            left: 45%;
+            transform: rotate(20deg);
+        }
+
+        .stickman-leg-right {
+            right: 45%;
+            transform: rotate(-20deg);
         }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="ascii-art">
 🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️🖥️
@@ -173,14 +261,26 @@
         </div>
     </div>
 
-    <div id="terminal">
+    <!-- Terminal Screen -->
+    <div id="terminal" class="terminal-enter">
         <div id="output"></div>
         <div id="input-line">
             <span id="prompt">harisaran@portfolio:~$</span>
-            <input type="text" id="command-input" autocomplete="off">
+            <input type="text" id="command-input" autocomplete="off" spellcheck="false">
         </div>
     </div>
 
+    <!-- Stickman Running Animation -->
+    <div id="stickman-container">
+        <div class="stickman">
+            <div class="stickman-head"></div>
+            <div class="stickman-body"></div>
+            <div class="stickman-arm-left"></div>
+            <div class="stickman-arm-right"></div>
+            <div class="stickman-leg-left"></div>
+            <div class="stickman-leg-right"></div>
+        </div>
+    </div>
     <script>
         const loadingScreen = document.getElementById('loading-screen');
         const loadingProgress = document.getElementById('loading-progress');
@@ -188,34 +288,17 @@
         const output = document.getElementById('output');
         const commandInput = document.getElementById('command-input');
         const prompt = document.getElementById('prompt');
+        const stickmanContainer = document.getElementById('stickman-container');
 
-        // Loading Screen
-        function simulateLoading() {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 20;
-                loadingProgress.style.width = `${Math.min(progress, 100)}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                        terminal.style.display = 'flex';
-                        commandInput.focus();
-                    }, 500);
-                }
-            }, 200);
-        }
-
-        // Simplified ASCII Art
+        // ASCII Logo
         const asciiLogo = `
  _   _    _    ____  ___ ____    _    ____      _    _   _ 
-| | | |  / \  |  _ \|_ _/ ___|  / \  |  _ \    / \  | \ | |
-| |_| | / _ \ | |_) || |\___ \ / _ \ | |_) |  / _ \ |  \| |
-|  _  |/ ___ \|  _ < | | ___) / ___ \|  _ <  / ___ \| |\  |
-|_| |_/_/   \_\_| \_\___|____/_/   \_\_| \_\/_/   \_\_| \_|`;
+| | | |  / \\  |  _ \\|_ _/ ___|  / \\  |  _ \\    / \\  | \\ | |
+| |_| | / _ \\ | |_) || |\\___ \\ / _ \\ | |_) |  / _ \\ |  \\| |
+|  _  |/ ___ \\|  _ < | | ___) / ___ \\|  _ <  / ___ \\| |\\  |
+|_| |_/_/   \\_\\_| \\_\\___|____/_/   \\_\\_| \\_\\/_/   \\_\\_| \\_|`;
 
-        // Updated Project Data with Hyperlinks
+        // Project Data
         const projectsData = [
             {
                 name: "Terminal Portfolio",
@@ -231,18 +314,26 @@
             }
         ];
 
-        // Commands with Hyperlinks
+        // Enhanced Commands
         const commands = {
             help: () => {
-                return `<span class='highlight'>Available Commands:</span>
-help        - Show this help menu
-about       - Learn about Harisaran
-skills      - View technical skills
-projects    - List notable projects
-contact     - Get contact information
-socials     - View social media links
-easter      - Surprise command!
-clear       - Clear the terminal screen`;
+                const helpCommands = [
+                    { cmd: 'help', desc: 'Show all available commands' },
+                    { cmd: 'about', desc: 'Learn about Harisaran' },
+                    { cmd: 'skills', desc: 'View technical skills' },
+                    { cmd: 'projects', desc: 'List notable projects' },
+                    { cmd: 'contact', desc: 'Get contact information' },
+                    { cmd: 'socials', desc: 'View social media links' },
+                    { cmd: 'easter', desc: 'Surprise command!' },
+                    { cmd: 'matrix', desc: 'Activate matrix mode' },
+                    { cmd: 'run', desc: 'Activate stickman running animation' },
+                    { cmd: 'clear', desc: 'Clear the terminal screen' }
+                ];
+
+                return `<span class='glitch-text'>🚀 Available Commands:</span>
+${helpCommands.map(cmd => 
+    `<span class='hyperlink'>${cmd.cmd.padEnd(10)}</span> - ${cmd.desc}`
+).join('\n')}`;
             },
             about: () => {
                 return `
@@ -296,7 +387,7 @@ ${projectsData.map(project => `
 <span class='highlight'>Contact Information:</span>
 📧 Email    : <a href="mailto:nambuharisaran@example.com" class="hyperlink">nambuharisaran@example.com</a>
 🌐 Portfolio: <a href="https://nambuharisaran.github.io" class="hyperlink">nambuharisaran.github.io</a>
-📍 Location : [Your City]`;
+📍 Location : Bengaluru, India`;
             },
             socials: () => {
                 return `
@@ -305,6 +396,66 @@ ${projectsData.map(project => `
 🐱 GitHub   : <a href="https://github.com/nambuharisaran" class="hyperlink" target="_blank">github.com/nambuharisaran</a>
 🐦 Twitter  : <a href="https://twitter.com/nambuharisaran" class="hyperlink" target="_blank">twitter.com/nambuharisaran</a>
 📸 Instagram: <a href="https://instagram.com/nambuharisaran" class="hyperlink" target="_blank">instagram.com/nambuharisaran</a>`;
+            },
+            matrix: () => {
+                const matrixContainer = document.createElement('div');
+                matrixContainer.style.position = 'fixed';
+                matrixContainer.style.top = '0';
+                matrixContainer.style.left = '0';
+                matrixContainer.style.width = '100vw';
+                matrixContainer.style.height = '100vh';
+                matrixContainer.style.backgroundColor = 'black';
+                matrixContainer.style.zIndex = '9999';
+                matrixContainer.style.color = 'green';
+                matrixContainer.style.fontFamily = 'monospace';
+                matrixContainer.style.overflow = 'hidden';
+                matrixContainer.style.pointerEvents = 'none';
+
+                document.body.appendChild(matrixContainer);
+
+                function createMatrixRain() {
+                    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+                    const columns = window.innerWidth / 10;
+                    const drops = [];
+
+                    for (let x = 0; x < columns; x++) {
+                        drops[x] = 1;
+                    }
+
+                    function draw() {
+                        matrixContainer.innerHTML = '';
+                        for (let i = 0; i < drops.length; i++) {
+                            const text = document.createElement('span');
+                            text.textContent = characters.charAt(Math.floor(Math.random() * characters.length));
+                            text.style.position = 'absolute';
+                            text.style.left = `${i * 10}px`;
+                            text.style.top = `${drops[i] * 10}px`;
+                            text.style.color = 'green';
+                            matrixContainer.appendChild(text);
+
+                            if (drops[i] * 10 > window.innerHeight && Math.random() > 0.975) {
+                                drops[i] = 0;
+                            }
+                            drops[i]++;
+                        }
+                    }
+
+                    const matrixInterval = setInterval(draw, 50);
+                    setTimeout(() => {
+                        clearInterval(matrixInterval);
+                        document.body.removeChild(matrixContainer);
+                    }, 10000);
+                }
+
+                createMatrixRain();
+                return '<span class="glitch-text">🌐 Entering Matrix Mode... Hack the Planet!</span>';
+            },
+            run: () => {
+                stickmanContainer.style.display = 'flex';
+                setTimeout(() => {
+                    stickmanContainer.style.display = 'none';
+                }, 10000);
+                return '<span class="pulse">🏃 Running Stickman Activated!</span>';
             },
             easter: () => {
                 const easterEggs = [
@@ -315,43 +466,22 @@ ${projectsData.map(project => `
                 ];
                 return `<span class='easter-egg'>${easterEggs[Math.floor(Math.random() * easterEggs.length)]}</span>`;
             },
-            colab: () => {
-                return `
-<span class='highlight'>Collaboration Opportunities</span>
-🤝 Open to Collaborations:
-   • Open Source Projects
-   • Innovative Tech Solutions
-   • Machine Learning Initiatives
-
-<span class='easter-egg'>Interested in working together? 
-Let's create something amazing! 🚀</span>
-
-📧 Collaboration Inquiry: 
-   <a href="mailto:nambuharisaran@example.com" class="hyperlink">nambuharisaran@example.com</a>`;
-            },
-            instagram: () => {
-                return `
-<span class='highlight'>Instagram Insights</span>
-📸 Instagram: <a href="https://instagram.com/nambuharisaran" class="hyperlink" target="_blank">@nambuharisaran</a>
-
-<span class='easter-egg'>
-Tech stories, coding adventures, 
-and behind-the-scenes of my developer journey!
-Follow for daily tech inspiration! 🖥️✨</span>`;
-            },
             clear: () => {
                 output.innerHTML = '';
                 return '';
             }
         };
 
-        function displayOutput(text) {
+        // Display Output Function
+        function displayOutput(text, className = '') {
             const outputDiv = document.createElement('div');
             outputDiv.innerHTML = text;
+            if (className) outputDiv.classList.add(className);
             output.appendChild(outputDiv);
             output.scrollTop = output.scrollHeight;
         }
 
+        // Command Handling
         function handleCommand() {
             const command = commandInput.value.trim().toLowerCase();
             displayOutput(`${prompt.textContent} ${command}`);
@@ -361,7 +491,7 @@ Follow for daily tech inspiration! 🖥️✨</span>`;
             );
 
             if (matchedCommand) {
-                displayOutput(commands[matchedCommand]());
+                displayOutput(commands[matchedCommand](), 'pulse');
             } else {
                 displayOutput(`<span style="color: red;">Command not found: ${command}
 Type 'help' for available commands.</span>`);
@@ -373,24 +503,37 @@ Type 'help' for available commands.</span>`);
         // Event Listeners
         commandInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter') {
-                try {
-                    handleCommand();
-                } catch (err) {
-                    console.error('Error handling command:', err);
-                }
+                handleCommand();
             }
         });
 
-        // Start Loading
+        // Loading and Initial Setup
+        function simulateLoading() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                loadingProgress.style.width = `${Math.min(progress, 100)}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        terminal.style.display = 'flex';
+                        commandInput.focus();
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        // Start Loading and Show Welcome Message
         window.addEventListener('load', () => {
             simulateLoading();
-
-            // Initial welcome message after loading
             displayOutput(`<div class='ascii-art'>${asciiLogo}</div>`);
             displayOutput(`
 <span class='highlight'>Welcome to Harisaran's Developer Portfolio Terminal!</span>
 Type 'help' to explore available commands.`);
         });
+        
     </script>
-</body>
+    </body>
 </html>
